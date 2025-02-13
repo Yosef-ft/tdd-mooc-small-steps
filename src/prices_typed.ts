@@ -43,7 +43,7 @@ function createApp(database: Database) {
     if (type === "night") {
       return calculateCostForNightTicket(age, baseCost);
     } else {
-      return calculateCostForDayTicket(age, date, baseCost);
+      return calculateCostForDayTicket(age, date, baseCost, date2);
     }
   }
 
@@ -60,8 +60,8 @@ function createApp(database: Database) {
     return baseCost;
   }
 
-  function calculateCostForDayTicket(age: number | undefined, date: Date | undefined, baseCost: number) {
-    let reduction = calculateReduction(date);
+  function calculateCostForDayTicket(age: number | undefined, date: Date | undefined, baseCost: number, date2: Temporal.PlainDate | undefined) {
+    let reduction = calculateReduction(date, date2);
     if (age === undefined) {
       return Math.ceil(baseCost * (1 - reduction / 100));
     }
@@ -77,19 +77,19 @@ function createApp(database: Database) {
     return Math.ceil(baseCost * (1 - reduction / 100));
   }
 
-  function calculateReduction(date: Date | undefined) {
+  function calculateReduction(date: Date | undefined, date2: Temporal.PlainDate | undefined) {
     let reduction = 0;
-    if (date && isMonday(date) && !isHoliday(date)) {
+    if (date && isMonday(date, date2) && !isHoliday(date, date2)) {
       reduction = 35;
     }
     return reduction;
   }
 
-  function isMonday(date: Date) {
+  function isMonday(date: Date, date2: Temporal.PlainDate | undefined) {
     return date.getDay() === 1;
   }
 
-  function isHoliday(date: Date | undefined) {
+  function isHoliday(date: Date | undefined,  date2: Temporal.PlainDate | undefined) {
     const holidays = database.getHolidays();
     for (let row of holidays) {
       let holiday = new Date(row.holiday);
